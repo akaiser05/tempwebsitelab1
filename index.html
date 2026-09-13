@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Senior Design temperature monitoring dashboard">
+    <title>Senior Design | Temperature Monitor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="dashboard-shell">
+        <section class="chart-panel" aria-label="Temperature graph">
+            <div class="chart-wrap">
+                <svg id="temperature-chart" viewBox="0 0 920 400" role="img" aria-label="Live temperature over time line chart">
+                    <g id="grid-lines"></g>
+                    <g id="axis-labels"></g>
+                    <g id="time-axis-labels"></g>
+                    <text class="axis-label" x="910" y="180" text-anchor="middle" transform="rotate(90 910 180)">Temperature (°C)</text>
+                    <polyline id="temperature-line" points="" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                    <circle id="latest-point" r="6" fill="currentColor"></circle>
+                </svg>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

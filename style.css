@@ -1,0 +1,234 @@
+:root {
+    color-scheme: light;
+    --ink: #17232b;
+    --muted: #68777d;
+    --paper: #f4f0e8;
+    --panel: #fffdf8;
+    --line: #d8d9d2;
+    --accent: #d85b3f;
+    --accent-soft: #f4d9ce;
+    --teal: #2b7270;
+    --shadow: 0 18px 45px rgba(34, 44, 47, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 8% 10%, rgba(216, 91, 63, 0.1), transparent 24rem),
+        linear-gradient(135deg, #f8f4ec 0%, var(--paper) 55%, #e8efea 100%);
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.dashboard-shell {
+    width: min(1180px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 56px 0 28px;
+}
+
+.site-header,
+.panel-heading,
+.site-footer,
+.status {
+    display: flex;
+    align-items: center;
+}
+
+.site-header,
+.panel-heading,
+.site-footer {
+    justify-content: space-between;
+}
+
+.eyebrow,
+.card-label,
+.range-label,
+.site-footer,
+.status {
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.eyebrow {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    margin-bottom: 0;
+    font-size: clamp(2.2rem, 5vw, 4.5rem);
+    line-height: 0.96;
+    font-weight: 400;
+}
+
+h2 {
+    margin-bottom: 0;
+    font-size: clamp(1.45rem, 2.5vw, 2.2rem);
+    font-weight: 400;
+}
+
+.status {
+    gap: 9px;
+    padding: 10px 14px;
+    border: 1px solid rgba(43, 114, 112, 0.24);
+    border-radius: 999px;
+    color: var(--teal);
+    background: rgba(255, 253, 248, 0.65);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 5px rgba(43, 114, 112, 0.12);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: 16px;
+    margin: 48px 0 22px;
+}
+
+.summary-card,
+.chart-panel {
+    border: 1px solid rgba(23, 35, 43, 0.1);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+}
+
+.summary-card {
+    min-height: 150px;
+    padding: 25px;
+}
+
+.summary-card-primary {
+    color: #fffaf2;
+    background: var(--ink);
+}
+
+.card-label {
+    display: block;
+    margin-bottom: 20px;
+    color: var(--muted);
+    font-size: 0.69rem;
+    font-weight: 700;
+}
+
+.summary-card-primary .card-label,
+.summary-card-primary .card-detail {
+    color: #b9c7c3;
+}
+
+.summary-card strong {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-size: clamp(2.2rem, 5vw, 3.7rem);
+    line-height: 0.95;
+    font-weight: 400;
+}
+
+.summary-card-primary strong {
+    color: #f4b39c;
+}
+
+.card-detail {
+    color: var(--muted);
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 0.78rem;
+}
+
+.chart-panel {
+    padding: 30px 30px 22px;
+}
+
+.range-label {
+    color: var(--muted);
+    font-size: 0.68rem;
+}
+
+.chart-wrap {
+    width: 100%;
+    margin-top: 24px;
+    overflow: hidden;
+}
+
+#temperature-chart {
+    display: block;
+    width: 100%;
+    min-height: 300px;
+    color: var(--accent);
+}
+
+.grid-line {
+    stroke: var(--line);
+    stroke-width: 1;
+    stroke-dasharray: 4 7;
+}
+
+.axis-label {
+    fill: var(--muted);
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 13px;
+}
+
+.site-footer {
+    gap: 14px;
+    padding: 18px 2px 0;
+    color: var(--muted);
+    font-size: 0.64rem;
+}
+
+@media (max-width: 700px) {
+    .dashboard-shell {
+        width: min(100% - 28px, 560px);
+        padding-top: 32px;
+    }
+
+    .site-header {
+        align-items: flex-start;
+        gap: 24px;
+        flex-direction: column;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        margin-top: 34px;
+    }
+
+    .summary-card {
+        min-height: auto;
+    }
+
+    .chart-panel {
+        padding: 22px 14px 14px;
+    }
+
+    .panel-heading {
+        align-items: flex-start;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    #temperature-chart {
+        min-height: 250px;
+    }
+}
