@@ -13,16 +13,32 @@
             °C
         </button>
 
-        <section class="chart-panel" aria-label="Temperature graph">
+        <section class="chart-panel" aria-label="Sensor 1 temperature graph">
+            <h2>Sensor 1</h2>
             <div class="chart-wrap">
-                <svg id="temperature-chart" viewBox="0 0 1000 400" role="img" aria-label="Live temperature over time line chart">
-                    <g id="grid-lines"></g>
-                    <g id="axis-labels"></g>
-                    <g id="time-axis-labels"></g>
+                <svg id="temperature-chart-1" class="temperature-chart" viewBox="0 0 1000 400" role="img" aria-label="Live sensor 1 temperature over time line chart">
+                    <g id="grid-lines-1"></g>
+                    <g id="axis-labels-1"></g>
+                    <g id="time-axis-labels-1"></g>
                     <text class="axis-label" x="470" y="398" text-anchor="middle">seconds ago from the current time</text>
-                    <text id="temperature-axis-label" class="axis-label" x="960" y="180" text-anchor="middle" transform="rotate(90 960 180)">Temperature (°C)</text>
-                    <polyline id="temperature-line" points="" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                    <circle id="latest-point" r="6" fill="currentColor"></circle>
+                    <text id="temperature-axis-label-1" class="axis-label" x="960" y="180" text-anchor="middle" transform="rotate(90 960 180)">Temperature (°C)</text>
+                    <polyline id="temperature-line-1" points="" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                    <circle id="latest-point-1" r="6" fill="currentColor"></circle>
+                </svg>
+            </div>
+        </section>
+
+        <section class="chart-panel" aria-label="Sensor 2 temperature graph">
+            <h2>Sensor 2</h2>
+            <div class="chart-wrap">
+                <svg id="temperature-chart-2" class="temperature-chart" viewBox="0 0 1000 400" role="img" aria-label="Live sensor 2 temperature over time line chart">
+                    <g id="grid-lines-2"></g>
+                    <g id="axis-labels-2"></g>
+                    <g id="time-axis-labels-2"></g>
+                    <text class="axis-label" x="470" y="398" text-anchor="middle">seconds ago from the current time</text>
+                    <text id="temperature-axis-label-2" class="axis-label" x="960" y="180" text-anchor="middle" transform="rotate(90 960 180)">Temperature (°C)</text>
+                    <polyline id="temperature-line-2" points="" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                    <circle id="latest-point-2" r="6" fill="currentColor"></circle>
                 </svg>
             </div>
         </section>

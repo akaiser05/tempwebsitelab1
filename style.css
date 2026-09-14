@@ -171,11 +171,15 @@ h2 {
     overflow: hidden;
 }
 
-#temperature-chart {
+.temperature-chart {
     display: block;
     width: 100%;
     min-height: 300px;
     color: var(--accent);
+}
+
+.chart-panel + .chart-panel {
+    margin-top: 22px;
 }
 
 .grid-line {
@@ -228,7 +232,7 @@ h2 {
         flex-direction: column;
     }
 
-    #temperature-chart {
+    .temperature-chart {
         min-height: 250px;
     }
 }

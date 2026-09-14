@@ -1,10 +1,4 @@
-const gridLines = document.querySelector('#grid-lines');
-const axisLabels = document.querySelector('#axis-labels');
-const timeAxisLabels = document.querySelector('#time-axis-labels');
-const temperatureLine = document.querySelector('#temperature-line');
-const latestPoint = document.querySelector('#latest-point');
 const unitToggle = document.querySelector('#unit-toggle');
-const temperatureAxisLabel = document.querySelector('#temperature-axis-label');
 
 const chartLeft = 70;
 const chartTop = 20;
@@ -14,10 +8,8 @@ const minimumValue = 10;
 const maximumValue = 50;
 const maximumSeconds = 300;
 const maximumReadings = 300;
-const readings = [];
-
-const sensor1 = [];
-const sensor2 = [];
+const sensor1Readings = [];
+const sensor2Readings = [];
 
 let isFahrenheit = false;
 
@@ -45,40 +37,19 @@ function getTemperatureRange() {
         : { minimum: minimumValue, maximum: maximumValue };
 }
 
-function temperatureCalculation(sensor1, sensor2) {
-    const currentTimeSec = Math.floor(Date.now() / 1000);
-
-    const s1 = sensor1.findLast(entry => entry.timeSec <= currentTimeSec);
-    const s2 = sensor2.findLast(entry => entry.timeSec <= currentTimeSec);
-    
-    if (s1 == -1 && s2 == -1) {
-        return null;
-    }
-    else if (s1 == -1) {
-        return s2;
-
-    }
-    else if (s2 == -1) {
-        return s1;
-    }
-    else {
-        return (s1.temperature + s2.temperature) / 2;
-    }
-}
-
-function addReading() {
-    const previous = readings.at(-1)?.temperature ?? 20;
-    const temperature = clamp(previous + (Math.random() - 0.5) * 8, minimumValue, maximumValue);
+function addReading(readings, randomTemperature) {
+    const previous = readings.at(-1)?.temperature ?? randomTemperature();
+    const temperature = clamp(previous + randomTemperature(), minimumValue, maximumValue);
 
     readings.push({ time: Date.now(), temperature });
     while (readings.length > maximumReadings) {
         readings.shift();
     }
 
-    renderChart();
+    renderChart(readings);
 }
 
-function renderChart() {
+function renderChart(readings) {
     if (!readings.length) {
         return;
     }
@@ -104,11 +75,11 @@ function renderChart() {
         latestValidReading = reading;
     }
 
-    if (points.length > 0) {
-        temperatureLine.setAttribute('points', points.join(' '));
-    } else {
-        temperatureLine.setAttribute('points', '');
-    }
+    const chartNumber = readings === sensor1Readings ? 1 : 2;
+    const temperatureLine = document.querySelector(`#temperature-line-${chartNumber}`);
+    const latestPoint = document.querySelector(`#latest-point-${chartNumber}`);
+
+    temperatureLine.setAttribute('points', points.join(' '));
 
     if (latestValidReading) {
         latestPoint.setAttribute('cx', chartX(0));
@@ -119,11 +90,15 @@ function renderChart() {
     }
 }
 
-function drawAxes() {
+function drawAxes(chartNumber) {
     const axisValues = isFahrenheit
         ? [122, 108, 93, 79, 64, 50]
         : [50, 40, 30, 20, 10];
     const rightEdgeX = chartLeft + chartWidth + 32;
+
+    const gridLines = document.querySelector(`#grid-lines-${chartNumber}`);
+    const axisLabels = document.querySelector(`#axis-labels-${chartNumber}`);
+    const timeAxisLabels = document.querySelector(`#time-axis-labels-${chartNumber}`);
 
     gridLines.innerHTML = axisValues.map(value => {
         const y = chartY(value);
@@ -147,11 +122,21 @@ unitToggle.addEventListener('click', () => {
     isFahrenheit = !isFahrenheit;
     unitToggle.setAttribute('aria-pressed', String(isFahrenheit));
     unitToggle.textContent = isFahrenheit ? '°F' : '°C';
-    temperatureAxisLabel.textContent = isFahrenheit ? 'Temperature (°F)' : 'Temperature (°C)';
-    drawAxes();
-    renderChart();
+    document.querySelectorAll('[id^="temperature-axis-label-"]').forEach(axisLabel => {
+        axisLabel.textContent = isFahrenheit ? 'Temperature (°F)' : 'Temperature (°C)';
+    });
+    drawAxes(1);
+    drawAxes(2);
+    renderChart(sensor1Readings);
+    renderChart(sensor2Readings);
 });
 
-drawAxes();
-renderChart();
-setInterval(addReading, 1000);
+const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
+const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
+
+drawAxes(1);
+drawAxes(2);
+renderChart(sensor1Readings);
+renderChart(sensor2Readings);
+setInterval(() => addReading(sensor1Readings, sensor1RandomTemperature), 1000);
+setInterval(() => addReading(sensor2Readings, sensor2RandomTemperature), 1000);
