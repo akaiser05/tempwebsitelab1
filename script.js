@@ -17,13 +17,18 @@ const maximumReadings = 300;
 const readings = [];
 let isFahrenheit = false;
 
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+
 function chartX(secondsAgo) {
     return chartLeft + ((maximumSeconds - secondsAgo) / maximumSeconds) * chartWidth;
 }
 
 function chartY(temperature) {
     const { minimum, maximum } = getTemperatureRange();
-    return chartTop + ((maximum - temperature) / (maximum - minimum)) * chartHeight;
+    const safeRange = maximum - minimum || 1;
+    return chartTop + ((maximum - temperature) / safeRange) * chartHeight;
 }
 
 function toDisplayTemperature(celsius) {
@@ -36,12 +41,27 @@ function getTemperatureRange() {
         : { minimum: minimumValue, maximum: maximumValue };
 }
 
-function addReading() {
-    const now = new Date();
-    const previous = readings.at(-1)?.temperature ?? 20;
-    const temperature = Math.max(minimumValue, Math.min(maximumValue, previous + (Math.random() - 0.5) * 8));
+function seedReadings() {
+    const now = Date.now();
+    const baseLine = 22;
 
-    readings.push({ time: now, temperature });
+    for (let secondsAgo = maximumSeconds; secondsAgo >= 0; secondsAgo -= 1) {
+        const wave = Math.sin(secondsAgo / 16) * 7 + Math.cos(secondsAgo / 31) * 4;
+        const offset = Math.sin(secondsAgo / 8) * 3;
+        const temperature = clamp(baseLine + wave + offset, minimumValue, maximumValue);
+
+        readings.push({
+            time: now - secondsAgo * 1000,
+            temperature,
+        });
+    }
+}
+
+function addReading() {
+    const previous = readings.at(-1)?.temperature ?? 20;
+    const temperature = clamp(previous + (Math.random() - 0.5) * 8, minimumValue, maximumValue);
+
+    readings.push({ time: Date.now(), temperature });
     while (readings.length > maximumReadings) {
         readings.shift();
     }
@@ -50,8 +70,17 @@ function addReading() {
 }
 
 function renderChart() {
+    if (!readings.length) {
+        return;
+    }
+
     const newestTime = readings.at(-1).time;
     const visibleReadings = readings.filter(reading => (newestTime - reading.time) / 1000 <= maximumSeconds);
+
+    if (!visibleReadings.length) {
+        return;
+    }
+
     const points = visibleReadings.map(reading => {
         const secondsAgo = (newestTime - reading.time) / 1000;
         const temperature = toDisplayTemperature(reading.temperature);
@@ -95,5 +124,6 @@ unitToggle.addEventListener('click', () => {
 });
 
 drawAxes();
-addReading();
+seedReadings();
+renderChart();
 setInterval(addReading, 1000);
