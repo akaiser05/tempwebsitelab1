@@ -3,6 +3,8 @@ const axisLabels = document.querySelector('#axis-labels');
 const timeAxisLabels = document.querySelector('#time-axis-labels');
 const temperatureLine = document.querySelector('#temperature-line');
 const latestPoint = document.querySelector('#latest-point');
+const unitToggle = document.querySelector('#unit-toggle');
+const temperatureAxisLabel = document.querySelector('#temperature-axis-label');
 
 const chartLeft = 70;
 const chartTop = 20;
