@@ -15,6 +15,10 @@ const maximumValue = 50;
 const maximumSeconds = 300;
 const maximumReadings = 300;
 const readings = [];
+
+const sensor1 = [];
+const sensor2 = [];
+
 let isFahrenheit = false;
 
 function clamp(value, min, max) {
@@ -41,19 +45,24 @@ function getTemperatureRange() {
         : { minimum: minimumValue, maximum: maximumValue };
 }
 
-function seedReadings() {
-    const now = Date.now();
-    const baseLine = 22;
+function temperatureCalculation(sensor1, sensor2) {
+    const currentTimeSec = Math.floor(Date.now() / 1000);
 
-    for (let secondsAgo = maximumSeconds; secondsAgo >= 0; secondsAgo -= 1) {
-        const wave = Math.sin(secondsAgo / 16) * 7 + Math.cos(secondsAgo / 31) * 4;
-        const offset = Math.sin(secondsAgo / 8) * 3;
-        const temperature = clamp(baseLine + wave + offset, minimumValue, maximumValue);
+    const s1 = sensor1.findLast(entry => entry.timeSec <= currentTimeSec);
+    const s2 = sensor2.findLast(entry => entry.timeSec <= currentTimeSec);
+    
+    if (s1 == null && s2 == null) {
+        return null;
+    }
+    else if (s1 == null) {
+        return s2;
 
-        readings.push({
-            time: now - secondsAgo * 1000,
-            temperature,
-        });
+    }
+    else if (s2 == null) {
+        return s1;
+    }
+    else {
+        return (s1.temperature + s2.temperature) / 2;
     }
 }
 
@@ -81,16 +90,33 @@ function renderChart() {
         return;
     }
 
-    const points = visibleReadings.map(reading => {
+    const points = [];
+    let latestValidReading = null;
+
+    for (const reading of visibleReadings) {
+        if (reading.temperature == null) {
+            continue;
+        }
+
         const secondsAgo = (newestTime - reading.time) / 1000;
         const temperature = toDisplayTemperature(reading.temperature);
-        return `${chartX(secondsAgo).toFixed(1)},${chartY(temperature).toFixed(1)}`;
-    });
-    const latest = visibleReadings.at(-1);
+        points.push(`${chartX(secondsAgo).toFixed(1)},${chartY(temperature).toFixed(1)}`);
+        latestValidReading = reading;
+    }
 
-    temperatureLine.setAttribute('points', points.join(' '));
-    latestPoint.setAttribute('cx', chartX(0));
-    latestPoint.setAttribute('cy', chartY(toDisplayTemperature(latest.temperature)));
+    if (points.length > 0) {
+        temperatureLine.setAttribute('points', points.join(' '));
+    } else {
+        temperatureLine.setAttribute('points', '');
+    }
+
+    if (latestValidReading) {
+        latestPoint.setAttribute('cx', chartX(0));
+        latestPoint.setAttribute('cy', chartY(toDisplayTemperature(latestValidReading.temperature)));
+    } else {
+        latestPoint.setAttribute('cx', chartX(0));
+        latestPoint.setAttribute('cy', chartY(getTemperatureRange().minimum));
+    }
 }
 
 function drawAxes() {
@@ -124,6 +150,5 @@ unitToggle.addEventListener('click', () => {
 });
 
 drawAxes();
-seedReadings();
 renderChart();
 setInterval(addReading, 1000);
