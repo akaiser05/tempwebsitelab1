@@ -155,12 +155,12 @@ unitToggle.addEventListener('click', () => {
 
 sensorToggle.addEventListener('click', () => {
     visibleSensor = visibleSensor === 1 ? 2 : 1;
-    notVisibleSensor = visibleSensor === 1 ? 2 : 1;
     sensorPanels.forEach((panel, index) => {
         panel.hidden = index + 1 !== visibleSensor;
     });
     sensorToggle.setAttribute('aria-pressed', String(visibleSensor === 2));
-    sensorToggle.textContent = `Sensor ${visibleSensor}`;
+    const nextSensor = visibleSensor === 1 ? 2 : 1;
+    sensorToggle.textContent = `Sensor ${nextSensor}`;
     updateCurrentTemperature(visibleSensor === 1 ? sensor1Readings : sensor2Readings);
 });
 
