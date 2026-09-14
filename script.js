@@ -121,8 +121,10 @@ function renderChart() {
 
 function drawAxes() {
     const axisValues = isFahrenheit
-        ? [122, 101, 89, 75, 61, 50]
+        ? [50, 64, 79, 93, 108, 122]
         : [50, 40, 30, 20, 10];
+    const rightEdgeX = chartLeft + chartWidth + 18;
+
     gridLines.innerHTML = axisValues.map(value => {
         const y = chartY(value);
         return `<line class="grid-line" x1="${chartLeft}" y1="${y}" x2="${chartLeft + chartWidth}" y2="${y}"></line>`;
@@ -130,7 +132,7 @@ function drawAxes() {
 
     axisLabels.innerHTML = axisValues.map(value => {
         const y = chartY(value) + 5;
-        return `<text class="axis-label" x="${chartLeft + chartWidth}" y="${y}" text-anchor="end">${value}°</text>`;
+        return `<text class="axis-label" x="${rightEdgeX}" y="${y}" text-anchor="start">${value}°</text>`;
     }).join('');
 
     const timeValues = [300, 200, 100, 0];
