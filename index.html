@@ -16,13 +16,21 @@
             </div>
             <div class="controls" aria-label="Dashboard controls">
                 <button id="sensor-toggle" class="control-button" type="button" aria-pressed="false">
-                    Sensor 2
+                    Sensor 1
                 </button>
                 <button id="unit-toggle" class="control-button control-button-unit" type="button" aria-pressed="false">
                     °C
                 </button>
             </div>
         </header>
+
+        <section class="current-reading" aria-live="polite" aria-label="Selected sensor temperature">
+            <div>
+                <span class="reading-label">Selected sensor</span>
+                <strong id="selected-sensor">Sensor 1</strong>
+            </div>
+            <strong id="current-temperature" class="current-temperature">-- °C</strong>
+        </section>
 
         <section id="sensor-panel-1" class="chart-panel" aria-label="Sensor 1 temperature graph">
             <div class="panel-heading">

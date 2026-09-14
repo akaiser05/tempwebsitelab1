@@ -1,5 +1,7 @@
 const unitToggle = document.querySelector('#unit-toggle');
 const sensorToggle = document.querySelector('#sensor-toggle');
+const selectedSensor = document.querySelector('#selected-sensor');
+const currentTemperature = document.querySelector('#current-temperature');
 const sensorPanels = [
     document.querySelector('#sensor-panel-1'),
     document.querySelector('#sensor-panel-2')
@@ -35,6 +37,18 @@ function chartY(temperature) {
 
 function toDisplayTemperature(celsius) {
     return isFahrenheit ? celsius * 9 / 5 + 32 : celsius;
+}
+
+function updateCurrentTemperature(readings) {
+    if (readings !== (visibleSensor === 1 ? sensor1Readings : sensor2Readings)) {
+        return;
+    }
+
+    const latestReading = readings.at(-1);
+    currentTemperature.textContent = latestReading
+        ? `${toDisplayTemperature(latestReading.temperature).toFixed(1)}°${isFahrenheit ? 'F' : 'C'}`
+        : `-- °${isFahrenheit ? 'F' : 'C'}`;
+    selectedSensor.textContent = `Sensor ${visibleSensor}`;
 }
 
 function getTemperatureRange() {
@@ -94,6 +108,8 @@ function renderChart(readings) {
         latestPoint.setAttribute('cx', chartX(0));
         latestPoint.setAttribute('cy', chartY(getTemperatureRange().minimum));
     }
+
+    updateCurrentTemperature(readings);
 }
 
 function drawAxes(chartNumber) {
@@ -144,7 +160,8 @@ sensorToggle.addEventListener('click', () => {
         panel.hidden = index + 1 !== visibleSensor;
     });
     sensorToggle.setAttribute('aria-pressed', String(visibleSensor === 2));
-    sensorToggle.textContent = `Sensor ${notVisibleSensor}`;
+    sensorToggle.textContent = `Sensor ${visibleSensor}`;
+    updateCurrentTemperature(visibleSensor === 1 ? sensor1Readings : sensor2Readings);
 });
 
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;

@@ -94,6 +94,40 @@ h2 {
     gap: 8px;
 }
 
+.current-reading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+    padding: 20px 24px;
+    border: 1px solid rgba(23, 35, 43, 0.1);
+    border-left: 5px solid var(--accent);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+}
+
+.reading-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font: 700 0.68rem 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+#selected-sensor {
+    font-size: 1.25rem;
+    font-weight: 400;
+}
+
+.current-temperature {
+    color: var(--accent);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    white-space: nowrap;
+}
+
 .control-button {
     min-height: 42px;
     padding: 0 16px;
@@ -257,6 +291,10 @@ h2 {
 
     .controls {
         width: 100%;
+    }
+
+    .current-reading {
+        padding: 18px;
     }
 
     .control-button:first-child {
