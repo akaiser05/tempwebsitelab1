@@ -41,7 +41,7 @@ function toDisplayTemperature(celsius) {
 
 function getTemperatureRange() {
     return isFahrenheit
-        ? { minimum: -4, maximum: 122 }
+        ? { minimum: 50, maximum: 122 }
         : { minimum: minimumValue, maximum: maximumValue };
 }
 
@@ -121,9 +121,9 @@ function renderChart() {
 
 function drawAxes() {
     const axisValues = isFahrenheit
-        ? [50, 64, 79, 93, 108, 122]
+        ? [122, 108, 93, 79, 64, 50]
         : [50, 40, 30, 20, 10];
-    const rightEdgeX = chartLeft + chartWidth + 18;
+    const rightEdgeX = chartLeft + chartWidth + 32;
 
     gridLines.innerHTML = axisValues.map(value => {
         const y = chartY(value);
