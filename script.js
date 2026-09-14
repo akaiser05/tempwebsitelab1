@@ -13,13 +13,25 @@ const maximumValue = 50;
 const maximumSeconds = 300;
 const maximumReadings = 300;
 const readings = [];
+let isFahrenheit = false;
 
 function chartX(secondsAgo) {
     return chartLeft + ((maximumSeconds - secondsAgo) / maximumSeconds) * chartWidth;
 }
 
 function chartY(temperature) {
-    return chartTop + ((maximumValue - temperature) / (maximumValue - minimumValue)) * chartHeight;
+    const { minimum, maximum } = getTemperatureRange();
+    return chartTop + ((maximum - temperature) / (maximum - minimum)) * chartHeight;
+}
+
+function toDisplayTemperature(celsius) {
+    return isFahrenheit ? celsius * 9 / 5 + 32 : celsius;
+}
+
+function getTemperatureRange() {
+    return isFahrenheit
+        ? { minimum: -4, maximum: 122 }
+        : { minimum: minimumValue, maximum: maximumValue };
 }
 
 function addReading() {
@@ -40,18 +52,20 @@ function renderChart() {
     const visibleReadings = readings.filter(reading => (newestTime - reading.time) / 1000 <= maximumSeconds);
     const points = visibleReadings.map(reading => {
         const secondsAgo = (newestTime - reading.time) / 1000;
-        return `${chartX(secondsAgo).toFixed(1)},${chartY(reading.temperature).toFixed(1)}`;
+        const temperature = toDisplayTemperature(reading.temperature);
+        return `${chartX(secondsAgo).toFixed(1)},${chartY(temperature).toFixed(1)}`;
     });
     const latest = visibleReadings.at(-1);
 
     temperatureLine.setAttribute('points', points.join(' '));
     latestPoint.setAttribute('cx', chartX(0));
-    latestPoint.setAttribute('cy', chartY(latest.temperature));
-
+    latestPoint.setAttribute('cy', chartY(toDisplayTemperature(latest.temperature)));
 }
 
 function drawAxes() {
-    const axisValues = [50, 35, 20, 5, -10, -20];
+    const axisValues = isFahrenheit
+        ? [122, 98, 74, 50, 26, -4]
+        : [50, 35, 20, 5, -10, -20];
     gridLines.innerHTML = axisValues.map(value => {
         const y = chartY(value);
         return `<line class="grid-line" x1="${chartLeft}" y1="${y}" x2="${chartLeft + chartWidth}" y2="${y}"></line>`;
@@ -68,6 +82,15 @@ function drawAxes() {
         return `<text class="axis-label" x="${x}" y="370" text-anchor="middle">${seconds}</text>`;
     }).join('');
 }
+
+unitToggle.addEventListener('click', () => {
+    isFahrenheit = !isFahrenheit;
+    unitToggle.setAttribute('aria-pressed', String(isFahrenheit));
+    unitToggle.textContent = isFahrenheit ? '°F' : '°C';
+    temperatureAxisLabel.textContent = isFahrenheit ? 'Temperature (°F)' : 'Temperature (°C)';
+    drawAxes();
+    renderChart();
+});
 
 drawAxes();
 addReading();
