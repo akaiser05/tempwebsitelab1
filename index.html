@@ -9,12 +9,25 @@
 </head>
 <body>
     <main class="dashboard-shell">
-        <button id="unit-toggle" type="button" aria-pressed="false">
-            °C
-        </button>
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">Senior Design</p>
+                <h1>Temperature monitor</h1>
+            </div>
+            <div class="controls" aria-label="Dashboard controls">
+                <button id="sensor-toggle" class="control-button" type="button" aria-pressed="false">
+                    Sensor 2
+                </button>
+                <button id="unit-toggle" class="control-button control-button-unit" type="button" aria-pressed="false">
+                    °C
+                </button>
+            </div>
+        </header>
 
-        <section class="chart-panel" aria-label="Sensor 1 temperature graph">
-            <h2>Sensor 1</h2>
+        <section id="sensor-panel-1" class="chart-panel" aria-label="Sensor 1 temperature graph">
+            <div class="panel-heading">
+                <h2>Sensor 1</h2>
+            </div>
             <div class="chart-wrap">
                 <svg id="temperature-chart-1" class="temperature-chart" viewBox="0 0 1000 400" role="img" aria-label="Live sensor 1 temperature over time line chart">
                     <g id="grid-lines-1"></g>
@@ -28,8 +41,10 @@
             </div>
         </section>
 
-        <section class="chart-panel" aria-label="Sensor 2 temperature graph">
-            <h2>Sensor 2</h2>
+        <section id="sensor-panel-2" class="chart-panel" aria-label="Sensor 2 temperature graph" hidden>
+            <div class="panel-heading">
+                <h2>Sensor 2</h2>
+            </div>
             <div class="chart-wrap">
                 <svg id="temperature-chart-2" class="temperature-chart" viewBox="0 0 1000 400" role="img" aria-label="Live sensor 2 temperature over time line chart">
                     <g id="grid-lines-2"></g>
@@ -43,6 +58,6 @@
             </div>
         </section>
     </main>
-    <script src="script.js"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>

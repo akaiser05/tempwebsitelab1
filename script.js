@@ -1,4 +1,9 @@
 const unitToggle = document.querySelector('#unit-toggle');
+const sensorToggle = document.querySelector('#sensor-toggle');
+const sensorPanels = [
+    document.querySelector('#sensor-panel-1'),
+    document.querySelector('#sensor-panel-2')
+];
 
 const chartLeft = 70;
 const chartTop = 20;
@@ -12,6 +17,7 @@ const sensor1Readings = [];
 const sensor2Readings = [];
 
 let isFahrenheit = false;
+let visibleSensor = 1;
 
 function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -129,6 +135,16 @@ unitToggle.addEventListener('click', () => {
     drawAxes(2);
     renderChart(sensor1Readings);
     renderChart(sensor2Readings);
+});
+
+sensorToggle.addEventListener('click', () => {
+    visibleSensor = visibleSensor === 1 ? 2 : 1;
+    notVisibleSensor = visibleSensor === 1 ? 2 : 1;
+    sensorPanels.forEach((panel, index) => {
+        panel.hidden = index + 1 !== visibleSensor;
+    });
+    sensorToggle.setAttribute('aria-pressed', String(visibleSensor === 2));
+    sensorToggle.textContent = `Sensor ${notVisibleSensor}`;
 });
 
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
