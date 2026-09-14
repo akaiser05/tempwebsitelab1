@@ -51,14 +51,14 @@ function temperatureCalculation(sensor1, sensor2) {
     const s1 = sensor1.findLast(entry => entry.timeSec <= currentTimeSec);
     const s2 = sensor2.findLast(entry => entry.timeSec <= currentTimeSec);
     
-    if (s1 == null && s2 == null) {
+    if (s1 == -1 && s2 == -1) {
         return null;
     }
-    else if (s1 == null) {
+    else if (s1 == -1) {
         return s2;
 
     }
-    else if (s2 == null) {
+    else if (s2 == -1) {
         return s1;
     }
     else {
@@ -121,8 +121,8 @@ function renderChart() {
 
 function drawAxes() {
     const axisValues = isFahrenheit
-        ? [122, 98, 74, 50, 26, -4]
-        : [50, 35, 20, 5, -10, -20];
+        ? [122, 101, 89, 75, 61, 50]
+        : [50, 40, 30, 20, 10];
     gridLines.innerHTML = axisValues.map(value => {
         const y = chartY(value);
         return `<line class="grid-line" x1="${chartLeft}" y1="${y}" x2="${chartLeft + chartWidth}" y2="${y}"></line>`;
@@ -130,7 +130,7 @@ function drawAxes() {
 
     axisLabels.innerHTML = axisValues.map(value => {
         const y = chartY(value) + 5;
-        return `<text class="axis-label" x="${chartLeft + chartWidth + 12}" y="${y}" text-anchor="start">${value}°</text>`;
+        return `<text class="axis-label" x="${chartLeft + chartWidth}" y="${y}" text-anchor="end">${value}°</text>`;
     }).join('');
 
     const timeValues = [300, 200, 100, 0];
