@@ -10,7 +10,7 @@ const chartLeft = 70;
 const chartTop = 20;
 const chartWidth = 800;
 const chartHeight = 320;
-const minimumValue = -20;
+const minimumValue = 10;
 const maximumValue = 50;
 const maximumSeconds = 300;
 const maximumReadings = 300;
@@ -130,7 +130,7 @@ function drawAxes() {
 
     axisLabels.innerHTML = axisValues.map(value => {
         const y = chartY(value) + 5;
-        return `<text class="axis-label" x="${chartLeft - 12}" y="${y}" text-anchor="end">${value}°</text>`;
+        return `<text class="axis-label" x="${chartLeft + chartWidth + 12}" y="${y}" text-anchor="start">${value}°</text>`;
     }).join('');
 
     const timeValues = [300, 200, 100, 0];
@@ -139,6 +139,7 @@ function drawAxes() {
         return `<text class="axis-label" x="${x}" y="370" text-anchor="middle">${seconds}</text>`;
     }).join('');
 }
+
 
 unitToggle.addEventListener('click', () => {
     isFahrenheit = !isFahrenheit;
