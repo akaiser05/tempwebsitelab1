@@ -14,6 +14,7 @@ const sensorPanels = [
     document.querySelector('#sensor-panel-1'),
     document.querySelector('#sensor-panel-2')
 ];
+const onOffToggle = document.querySelector('#on-off-toggle');
 
 const chartLeft = 70;
 const chartTop = 20;
@@ -112,6 +113,15 @@ function checkTemperatureAlert(readings, temperature) {
         alertState.low = true;
     } else if (!low) {
         alertState.low = false;
+    }
+}
+
+function thirdBoxToggle() {
+    if (onOffToggle.getAttribute('aria-pressed') === 'true') {
+        onOffToggle.setAttribute('aria-pressed', 'false');
+        onOffToggle.textContent = 'Off';
+        alertsEnabled.checked = false;
+        notificationStatus.textContent = 'Alerts disabled.';
     }
 }
 
