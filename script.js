@@ -3,6 +3,7 @@ const sensorToggle = document.querySelector('#sensor-toggle');
 const selectedSensor = document.querySelector('#selected-sensor');
 const currentTemperature = document.querySelector('#current-temperature');
 const notificationForm = document.querySelector('#notification-form');
+const notificationsEnabled = document.querySelector('#notifications-enabled');
 const notificationContact = document.querySelector('#notification-contact');
 const maximumTemperature = document.querySelector('#maximum-temperature');
 const minimumTemperature = document.querySelector('#minimum-temperature');
@@ -27,6 +28,7 @@ const sensor1Readings = [];
 const sensor2Readings = [];
 const alertStates = new Map();
 const deviceStateStorageKey = 'deviceOn';
+const notificationsStateStorageKey = 'notificationsEnabled';
 const databaseSignalEndpoint = '/api/device-state';
 
 let isFahrenheit = false;
@@ -34,6 +36,10 @@ let visibleSensor = 1;
 
 function getDeviceState() {
     return localStorage.getItem(deviceStateStorageKey) === 'true';
+}
+
+function getNotificationsEnabled() {
+    return localStorage.getItem(notificationsStateStorageKey) === 'true';
 }
 
 function updateDeviceStateUI(isOn) {
@@ -117,7 +123,7 @@ function checkTemperatureAlert(readings, temperature) {
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
 
-    if (!contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+    if (!getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
 
@@ -262,6 +268,13 @@ onOffToggle.addEventListener('click', () => {
     setDeviceState(!isCurrentlyOn);
 });
 
+notificationsEnabled.addEventListener('change', () => {
+    localStorage.setItem(notificationsStateStorageKey, String(notificationsEnabled.checked));
+    notificationStatus.textContent = notificationsEnabled.checked
+        ? 'Email notifications enabled.'
+        : 'Email notifications disabled.';
+});
+
 notificationForm.addEventListener('submit', event => {
     event.preventDefault();
 
@@ -279,6 +292,7 @@ const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
 const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
 
 updateDeviceStateUI(getDeviceState());
+notificationsEnabled.checked = getNotificationsEnabled();
 
 drawAxes(1);
 drawAxes(2);
