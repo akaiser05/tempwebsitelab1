@@ -119,19 +119,16 @@ function sendTemperatureAlert(message, sensorNumber, temperature) {
     const contact = notificationContact.value.trim();
 
     if (!contact) {
-        notificationStatus.textContent = 'Enter a phone number or email address before enabling alerts.';
+        notificationStatus.textContent = 'Enter an email address before enabling alerts.';
         return;
     }
 
     const subject = `Temperature alert: Sensor ${sensorNumber}`;
     const body = `${message}\nSensor ${sensorNumber} is reading ${temperature}.`;
-    const isEmail = contact.includes('@');
-    const destination = isEmail
-        ? `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-        : `sms:${encodeURIComponent(contact)}?body=${encodeURIComponent(body)}`;
+    const destination = `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     window.location.href = destination;
-    notificationStatus.textContent = `${isEmail ? 'Email' : 'Text'} alert opened for ${contact}.`;
+    notificationStatus.textContent = `Email alert opened for ${contact}.`;
 }
 
 function renderChart(readings) {
