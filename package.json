@@ -1,0 +1,7 @@
+{
+  "name": "temperature-monitor",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

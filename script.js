@@ -15,8 +15,6 @@ const sensorPanels = [
     document.querySelector('#sensor-panel-2')
 ];
 const onOffToggle = document.querySelector('#on-off-toggle');
-const staticFormsEndpoint = 'https://api.staticforms.dev/submit';
-const staticFormsAccessKey = 'sf_c72e79fcb796522af7247a55';
 
 const chartLeft = 70;
 const chartTop = 20;
@@ -153,19 +151,18 @@ async function sendTemperatureAlert(message, sensorNumber, temperature) {
 
     const subject = `Temperature alert: Sensor ${sensorNumber}`;
     const body = `${message}\nSensor ${sensorNumber} is reading ${temperature}.`;
-    const formData = new FormData();
-    formData.append('accessKey', staticFormsAccessKey);
-    formData.append('subject', subject);
-    formData.append('replyTo', contact);
-    formData.append('message', `Alert recipient: ${contact}\n${body}`);
-
-    const response = await fetch(staticFormsEndpoint, {
+    const response = await fetch('/api/send-email', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            to: contact,
+            subject,
+            message: body
+        })
     });
 
     if (!response.ok) {
-        throw new Error(`Static Forms request failed with status ${response.status}`);
+        throw new Error(`Email request failed with status ${response.status}`);
     }
 
     notificationStatus.textContent = 'Email alert sent.';
