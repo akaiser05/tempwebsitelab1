@@ -236,6 +236,14 @@ sensorToggle.addEventListener('click', () => {
     updateCurrentTemperature(visibleSensor === 1 ? sensor1Readings : sensor2Readings);
 });
 
+onOffToggle.addEventListener('click', () => {
+    const isOn = onOffToggle.getAttribute('aria-pressed') === 'true';
+    onOffToggle.setAttribute('aria-pressed', String(!isOn));
+    onOffToggle.textContent = isOn ? 'Off' : 'On';
+    alertsEnabled.checked = !isOn;
+    notificationStatus.textContent = isOn ? 'Alerts disabled.' : 'Alerts enabled.';
+});
+
 notificationForm.addEventListener('submit', event => {
     event.preventDefault();
 
