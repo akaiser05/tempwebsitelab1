@@ -2,6 +2,14 @@ const unitToggle = document.querySelector('#unit-toggle');
 const sensorToggle = document.querySelector('#sensor-toggle');
 const selectedSensor = document.querySelector('#selected-sensor');
 const currentTemperature = document.querySelector('#current-temperature');
+const notificationForm = document.querySelector('#notification-form');
+const alertsEnabled = document.querySelector('#alerts-enabled');
+const notificationContact = document.querySelector('#notification-contact');
+const maximumTemperature = document.querySelector('#maximum-temperature');
+const minimumTemperature = document.querySelector('#minimum-temperature');
+const highMessage = document.querySelector('#high-message');
+const lowMessage = document.querySelector('#low-message');
+const notificationStatus = document.querySelector('#notification-status');
 const sensorPanels = [
     document.querySelector('#sensor-panel-1'),
     document.querySelector('#sensor-panel-2')
@@ -17,6 +25,7 @@ const maximumSeconds = 300;
 const maximumReadings = 300;
 const sensor1Readings = [];
 const sensor2Readings = [];
+const alertStates = new Map();
 
 let isFahrenheit = false;
 let visibleSensor = 1;
@@ -67,6 +76,62 @@ function addReading(readings, randomTemperature) {
     }
 
     renderChart(readings);
+    checkTemperatureAlert(readings, temperature);
+}
+
+function checkTemperatureAlert(readings, temperature) {
+    const highLimit = Number(maximumTemperature.value);
+    const lowLimit = Number(minimumTemperature.value);
+    const contact = notificationContact.value.trim();
+    const alertState = alertStates.get(readings);
+
+    if (!alertsEnabled.checked || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+        return;
+    }
+
+    if (highLimit <= lowLimit) {
+        notificationStatus.textContent = 'The maximum temperature must be higher than the minimum.';
+        alertsEnabled.checked = false;
+        return;
+    }
+
+    const sensorNumber = readings === sensor1Readings ? 1 : 2;
+    const displayTemperature = `${toDisplayTemperature(temperature).toFixed(1)}°${isFahrenheit ? 'F' : 'C'}`;
+    const high = temperature > highLimit;
+    const low = temperature < lowLimit;
+
+    if (high && !alertState.high) {
+        sendTemperatureAlert(highMessage.value, sensorNumber, displayTemperature);
+        alertState.high = true;
+    } else if (!high) {
+        alertState.high = false;
+    }
+
+    if (low && !alertState.low) {
+        sendTemperatureAlert(lowMessage.value, sensorNumber, displayTemperature);
+        alertState.low = true;
+    } else if (!low) {
+        alertState.low = false;
+    }
+}
+
+function sendTemperatureAlert(message, sensorNumber, temperature) {
+    const contact = notificationContact.value.trim();
+
+    if (!contact) {
+        notificationStatus.textContent = 'Enter a phone number or email address before enabling alerts.';
+        return;
+    }
+
+    const subject = `Temperature alert: Sensor ${sensorNumber}`;
+    const body = `${message}\nSensor ${sensorNumber} is reading ${temperature}.`;
+    const isEmail = contact.includes('@');
+    const destination = isEmail
+        ? `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+        : `sms:${encodeURIComponent(contact)}?body=${encodeURIComponent(body)}`;
+
+    window.location.href = destination;
+    notificationStatus.textContent = `${isEmail ? 'Email' : 'Text'} alert opened for ${contact}.`;
 }
 
 function renderChart(readings) {
@@ -164,6 +229,19 @@ sensorToggle.addEventListener('click', () => {
     updateCurrentTemperature(visibleSensor === 1 ? sensor1Readings : sensor2Readings);
 });
 
+notificationForm.addEventListener('submit', event => {
+    event.preventDefault();
+
+    if (Number(maximumTemperature.value) <= Number(minimumTemperature.value)) {
+        notificationStatus.textContent = 'The maximum temperature must be higher than the minimum.';
+        return;
+    }
+
+    alertStates.set(sensor1Readings, { high: false, low: false });
+    alertStates.set(sensor2Readings, { high: false, low: false });
+    notificationStatus.textContent = 'Alert settings saved.';
+});
+
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
 const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
 
@@ -171,5 +249,7 @@ drawAxes(1);
 drawAxes(2);
 renderChart(sensor1Readings);
 renderChart(sensor2Readings);
+alertStates.set(sensor1Readings, { high: false, low: false });
+alertStates.set(sensor2Readings, { high: false, low: false });
 setInterval(() => addReading(sensor1Readings, sensor1RandomTemperature), 1000);
 setInterval(() => addReading(sensor2Readings, sensor2RandomTemperature), 1000);

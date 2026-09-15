@@ -107,6 +107,90 @@ h2 {
     box-shadow: var(--shadow);
 }
 
+.notification-panel {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.8fr);
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 22px;
+    padding: 20px 24px;
+    border: 1px solid rgba(23, 35, 43, 0.1);
+    background: rgba(255, 253, 248, 0.72);
+}
+
+.notification-heading {
+    align-self: start;
+}
+
+.notification-panel h2 {
+    margin: 0 0 18px;
+    font-size: 1.5rem;
+}
+
+.alert-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--teal);
+    font: 700 0.75rem 'Trebuchet MS', Arial, sans-serif;
+    text-transform: uppercase;
+}
+
+.alert-switch input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--teal);
+}
+
+.notification-form label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font: 700 0.68rem 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.notification-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.notification-field-wide {
+    grid-column: 1 / -1;
+}
+
+.notification-field input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid rgba(23, 35, 43, 0.16);
+    border-radius: 8px;
+    color: var(--ink);
+    background: #fffdf8;
+    font: 1rem Georgia, 'Times New Roman', serif;
+}
+
+.notification-field input:focus {
+    border-color: var(--accent);
+    outline: 3px solid var(--accent-soft);
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    grid-column: 1 / -1;
+}
+
+.notification-status {
+    min-height: 1.1em;
+    margin: 0;
+    color: var(--teal);
+    font: 0.78rem 'Trebuchet MS', Arial, sans-serif;
+}
+
 .reading-label {
     display: block;
     margin-bottom: 6px;
@@ -256,6 +340,26 @@ h2 {
 
 .chart-panel + .chart-panel {
     margin-top: 22px;
+}
+
+@media (max-width: 680px) {
+    .notification-panel {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .notification-form {
+        grid-template-columns: 1fr;
+    }
+
+    .notification-field-wide {
+        grid-column: auto;
+    }
+
+    .notification-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
 .grid-line {

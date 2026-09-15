@@ -32,6 +32,43 @@
             <strong id="current-temperature" class="current-temperature">-- °C</strong>
         </section>
 
+        <section class="notification-panel" aria-labelledby="notification-heading">
+            <div class="notification-heading">
+                <span class="reading-label">Temperature alert</span>
+                <h2 id="notification-heading">Alert settings</h2>
+                <label class="alert-switch" for="alerts-enabled">
+                    <input id="alerts-enabled" type="checkbox">
+                    <span>Enable alerts</span>
+                </label>
+            </div>
+            <form id="notification-form" class="notification-form">
+                <div class="notification-field notification-field-wide">
+                    <label for="notification-contact">Phone number or email address</label>
+                    <input id="notification-contact" name="contact" type="text" autocomplete="email tel" placeholder="name@example.com or +1 555 555 5555" required>
+                </div>
+                <div class="notification-field">
+                    <label for="maximum-temperature">Maximum temperature (C) </label>
+                    <input id="maximum-temperature" type="number" value="40" min="-100" max="200" step="0.1" required>
+                </div>
+                <div class="notification-field">
+                    <label for="minimum-temperature">Minimum temperature (C) </label>
+                    <input id="minimum-temperature" type="number" value="15" min="-100" max="200" step="0.1" required>
+                </div>
+                <div class="notification-field notification-field-wide">
+                    <label for="high-message">High-temperature message</label>
+                    <input id="high-message" type="text" value="Temperature is too high." required>
+                </div>
+                <div class="notification-field notification-field-wide">
+                    <label for="low-message">Low-temperature message</label>
+                    <input id="low-message" type="text" value="Temperature is too low." required>
+                </div>
+                <div class="notification-actions">
+                    <button class="control-button notification-button" type="submit">Save alert settings</button>
+                    <p id="notification-status" class="notification-status" role="status" aria-live="polite"></p>
+                </div>
+            </form>
+        </section>
+
         <section id="sensor-panel-1" class="chart-panel" aria-label="Sensor 1 temperature graph">
             <div class="panel-heading">
                 <h2>Sensor 1</h2>
