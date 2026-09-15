@@ -16,6 +16,10 @@ const sensorPanels = [
 ];
 const onOffToggle = document.querySelector('#on-off-toggle');
 
+const emailJsPublicKey = 'IA9jwjIDwLvYZmb_4';
+const emailJsServiceId = 'service_fjgljvm';
+const emailJsTemplateId = 'template_t84jn0b';
+
 const chartLeft = 70;
 const chartTop = 20;
 const chartWidth = 800;
@@ -32,6 +36,8 @@ const databaseSignalEndpoint = '/api/device-state';
 
 let isFahrenheit = false;
 let visibleSensor = 1;
+
+emailjs.init({ publicKey: emailJsPublicKey });
 
 function getNotificationsEnabled() {
     return localStorage.getItem(notificationsStateStorageKey) === 'true';
@@ -151,19 +157,11 @@ async function sendTemperatureAlert(message, sensorNumber, temperature) {
 
     const subject = `Temperature alert: Sensor ${sensorNumber}`;
     const body = `${message}\nSensor ${sensorNumber} is reading ${temperature}.`;
-    const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            to: contact,
-            subject,
-            message: body
-        })
+    await emailjs.send(emailJsServiceId, emailJsTemplateId, {
+        to_email: contact,
+        subject,
+        message: body
     });
-
-    if (!response.ok) {
-        throw new Error(`Email request failed with status ${response.status}`);
-    }
 
     notificationStatus.textContent = 'Email alert sent.';
 }

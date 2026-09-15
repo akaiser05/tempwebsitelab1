@@ -2,16 +2,15 @@ Senior Desing Lab 1
 
 This is a project meant to display temperature reading on a website from 2 sensors. 
 
-## Run the email-enabled site
+## EmailJS setup
 
-1. Install Node.js 18 or newer.
-2. Create a Resend account and verify the sender domain or email address.
-3. Export the values from `.env.example` in your terminal, then start the server:
+1. Create an account at https://www.emailjs.com/.
+2. Add an email service.
+3. Create an email template with these variables:
+	- `{{to_email}}` for the recipient email
+	- `{{subject}}` for the subject
+	- `{{message}}` for the alert text
+4. Copy the Public Key and Service ID into `script.js`. Replace `YOUR_EMAILJS_TEMPLATE_ID` with the Template ID created in EmailJS, which looks like `template_abc123`.
+5. Open `index.html` in a browser, enable notifications, enter an email, and save the alert settings.
 
-```sh
-export RESEND_API_KEY="your_resend_key"
-export RESEND_FROM_EMAIL="alerts@your-verified-domain.com"
-npm start
-```
-
-Open `http://localhost:3000`. The email in the form is now the actual recipient. The API key stays on the server and is never sent to the browser.
+The message is sent when a sensor crosses the configured maximum or minimum temperature. EmailJS uses a public browser key, so do not put a private server API key in this project.
