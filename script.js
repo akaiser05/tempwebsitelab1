@@ -3,7 +3,6 @@ const sensorToggle = document.querySelector('#sensor-toggle');
 const selectedSensor = document.querySelector('#selected-sensor');
 const currentTemperature = document.querySelector('#current-temperature');
 const notificationForm = document.querySelector('#notification-form');
-const alertsEnabled = document.querySelector('#alerts-enabled');
 const notificationContact = document.querySelector('#notification-contact');
 const maximumTemperature = document.querySelector('#maximum-temperature');
 const minimumTemperature = document.querySelector('#minimum-temperature');
@@ -27,9 +26,41 @@ const maximumReadings = 300;
 const sensor1Readings = [];
 const sensor2Readings = [];
 const alertStates = new Map();
+const deviceStateStorageKey = 'deviceOn';
+const databaseSignalEndpoint = '/api/device-state';
 
 let isFahrenheit = false;
 let visibleSensor = 1;
+
+function getDeviceState() {
+    return localStorage.getItem(deviceStateStorageKey) === 'true';
+}
+
+function updateDeviceStateUI(isOn) {
+    const value = String(isOn);
+    onOffToggle.setAttribute('aria-pressed', value);
+    onOffToggle.textContent = isOn ? 'On' : 'Off';
+}
+
+function setDeviceState(isOn) {
+    const value = String(isOn);
+    localStorage.setItem(deviceStateStorageKey, value);
+    updateDeviceStateUI(isOn);
+
+    fetch(databaseSignalEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ on: isOn })
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`Database signal failed with status ${response.status}`);
+        }
+    }).then(() => {
+        notificationStatus.textContent = `Database signal saved as ${value}.`;
+    }).catch(() => {
+        notificationStatus.textContent = `Device set to ${isOn ? 'On' : 'Off'}, but the database signal could not be sent.`;
+    });
+}
 
 function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -86,13 +117,12 @@ function checkTemperatureAlert(readings, temperature) {
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
 
-    if (!alertsEnabled.checked || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+    if (!contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
 
     if (highLimit <= lowLimit) {
         notificationStatus.textContent = 'The maximum temperature must be higher than the minimum.';
-        alertsEnabled.checked = false;
         return;
     }
 
@@ -113,15 +143,6 @@ function checkTemperatureAlert(readings, temperature) {
         alertState.low = true;
     } else if (!low) {
         alertState.low = false;
-    }
-}
-
-function thirdBoxToggle() {
-    if (onOffToggle.getAttribute('aria-pressed') === 'true') {
-        onOffToggle.setAttribute('aria-pressed', 'false');
-        onOffToggle.textContent = 'Off';
-        alertsEnabled.checked = false;
-        notificationStatus.textContent = 'Alerts disabled.';
     }
 }
 
@@ -237,11 +258,7 @@ sensorToggle.addEventListener('click', () => {
 });
 
 onOffToggle.addEventListener('click', () => {
-    const isOn = onOffToggle.getAttribute('aria-pressed') === 'true';
-    onOffToggle.setAttribute('aria-pressed', String(!isOn));
-    onOffToggle.textContent = isOn ? 'Off' : 'On';
-    alertsEnabled.checked = !isOn;
-    notificationStatus.textContent = isOn ? 'Alerts disabled.' : 'Alerts enabled.';
+    setDeviceState(!getDeviceState());
 });
 
 notificationForm.addEventListener('submit', event => {
@@ -259,6 +276,8 @@ notificationForm.addEventListener('submit', event => {
 
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
 const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
+
+updateDeviceStateUI(getDeviceState());
 
 drawAxes(1);
 drawAxes(2);
