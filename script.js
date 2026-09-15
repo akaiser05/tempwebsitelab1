@@ -258,7 +258,8 @@ sensorToggle.addEventListener('click', () => {
 });
 
 onOffToggle.addEventListener('click', () => {
-    setDeviceState(!getDeviceState());
+    const isCurrentlyOn = onOffToggle.getAttribute('aria-pressed') === 'true';
+    setDeviceState(!isCurrentlyOn);
 });
 
 notificationForm.addEventListener('submit', event => {
