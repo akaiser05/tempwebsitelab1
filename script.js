@@ -15,6 +15,8 @@ const sensorPanels = [
     document.querySelector('#sensor-panel-2')
 ];
 const onOffToggle = document.querySelector('#on-off-toggle');
+const staticFormsEndpoint = 'https://api.staticforms.dev/submit';
+const staticFormsAccessKey = 'sf_c72e79fcb796522af7247a55';
 
 const chartLeft = 70;
 const chartTop = 20;
@@ -123,21 +125,25 @@ function checkTemperatureAlert(readings, temperature) {
     const low = temperature < lowLimit;
 
     if (high && !alertState.high) {
-        sendTemperatureAlert(highMessage.value, sensorNumber, displayTemperature);
+        sendTemperatureAlert(highMessage.value, sensorNumber, displayTemperature).catch(() => {
+            notificationStatus.textContent = 'The email alert could not be sent.';
+        });
         alertState.high = true;
     } else if (!high) {
         alertState.high = false;
     }
 
     if (low && !alertState.low) {
-        sendTemperatureAlert(lowMessage.value, sensorNumber, displayTemperature);
+        sendTemperatureAlert(lowMessage.value, sensorNumber, displayTemperature).catch(() => {
+            notificationStatus.textContent = 'The email alert could not be sent.';
+        });
         alertState.low = true;
     } else if (!low) {
         alertState.low = false;
     }
 }
 
-function sendTemperatureAlert(message, sensorNumber, temperature) {
+async function sendTemperatureAlert(message, sensorNumber, temperature) {
     const contact = notificationContact.value.trim();
 
     if (!contact) {
@@ -147,10 +153,22 @@ function sendTemperatureAlert(message, sensorNumber, temperature) {
 
     const subject = `Temperature alert: Sensor ${sensorNumber}`;
     const body = `${message}\nSensor ${sensorNumber} is reading ${temperature}.`;
-    const destination = `mailto:${encodeURIComponent(contact)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const formData = new FormData();
+    formData.append('accessKey', staticFormsAccessKey);
+    formData.append('subject', subject);
+    formData.append('replyTo', contact);
+    formData.append('message', `Alert recipient: ${contact}\n${body}`);
 
-    window.location.href = destination;
-    notificationStatus.textContent = `Email alert opened for ${contact}.`;
+    const response = await fetch(staticFormsEndpoint, {
+        method: 'POST',
+        body: formData
+    });
+
+    if (!response.ok) {
+        throw new Error(`Static Forms request failed with status ${response.status}`);
+    }
+
+    notificationStatus.textContent = 'Email alert sent.';
 }
 
 function renderChart(readings) {
