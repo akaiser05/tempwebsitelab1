@@ -288,6 +288,14 @@ notificationForm.addEventListener('submit', event => {
     notificationStatus.textContent = 'Alert settings saved.';
 });
 
+async function readSensorsFromDatabase() { 
+    const response = await fetch('/api/sensor-readings');
+    const data = await response.json();
+
+    addReading(sensor1Readings, () => data.sensor1);
+    addReading(sensor2Readings, () => data.sensor2);
+}
+
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
 const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
 
