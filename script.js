@@ -27,16 +27,11 @@ const maximumReadings = 300;
 const sensor1Readings = [];
 const sensor2Readings = [];
 const alertStates = new Map();
-const deviceStateStorageKey = 'deviceOn';
 const notificationsStateStorageKey = 'notificationsEnabled';
 const databaseSignalEndpoint = '/api/device-state';
 
 let isFahrenheit = false;
 let visibleSensor = 1;
-
-function getDeviceState() {
-    return localStorage.getItem(deviceStateStorageKey) === 'true';
-}
 
 function getNotificationsEnabled() {
     return localStorage.getItem(notificationsStateStorageKey) === 'true';
@@ -49,22 +44,12 @@ function updateDeviceStateUI(isOn) {
 }
 
 function setDeviceState(isOn) {
-    const value = String(isOn);
-    localStorage.setItem(deviceStateStorageKey, value);
     updateDeviceStateUI(isOn);
 
     fetch(databaseSignalEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ on: isOn })
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error(`Database signal failed with status ${response.status}`);
-        }
-    }).then(() => {
-        notificationStatus.textContent = `Database signal saved as ${value}.`;
-    }).catch(() => {
-        notificationStatus.textContent = `Device set to ${isOn ? 'On' : 'Off'}, but the database signal could not be sent.`;
     });
 }
 
@@ -299,7 +284,7 @@ async function readSensorsFromDatabase() {
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
 const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
 
-updateDeviceStateUI(getDeviceState());
+updateDeviceStateUI(false);
 notificationsEnabled.checked = getNotificationsEnabled();
 
 drawAxes(1);
