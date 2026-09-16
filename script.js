@@ -114,13 +114,14 @@ function addReading(readings, randomTemperature) {
 }
 
 function checkTemperatureAlert(readings, temperature) {
+    const selectedReadings = visibleSensor === 1 ? sensor1Readings : sensor2Readings;
     const highLimit = Number(maximumTemperature.value);
     const lowLimit = Number(minimumTemperature.value);
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
     const deviceIsOn = onOffToggle.getAttribute('aria-pressed') === 'true';
 
-    if (!deviceIsOn || !getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+    if (readings !== selectedReadings || !deviceIsOn || !getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
 
@@ -270,7 +271,14 @@ sensorToggle.addEventListener('click', () => {
 
 onOffToggle.addEventListener('click', () => {
     const isCurrentlyOn = onOffToggle.getAttribute('aria-pressed') === 'true';
-    setDeviceState(!isCurrentlyOn);
+    const willBeOn = !isCurrentlyOn;
+
+    if (!willBeOn) {
+        notificationsEnabled.checked = false;
+        localStorage.setItem(notificationsStateStorageKey, 'false');
+    }
+
+    setDeviceState(willBeOn);
 });
 
 notificationsEnabled.addEventListener('change', () => {
