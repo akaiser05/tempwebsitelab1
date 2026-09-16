@@ -312,7 +312,7 @@ async function readSensorsFromDatabase() {
 const sensor1RandomTemperature = () => (Math.random() - 0.5) * 8;
 const sensor2RandomTemperature = () => (Math.random() - 0.5) * 14;
 
-updateDeviceStateUI(false);
+updateDeviceStateUI(true);
 notificationsEnabled.checked = getNotificationsEnabled();
 
 drawAxes(1);
