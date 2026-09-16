@@ -1,0 +1,436 @@
+:root {
+    color-scheme: light;
+    --ink: #17232b;
+    --muted: #68777d;
+    --paper: #f4f0e8;
+    --panel: #fffdf8;
+    --line: #d8d9d2;
+    --accent: #d85b3f;
+    --accent-soft: #f4d9ce;
+    --teal: #2b7270;
+    --shadow: 0 18px 45px rgba(34, 44, 47, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 8% 10%, rgba(216, 91, 63, 0.1), transparent 24rem),
+        linear-gradient(135deg, #f8f4ec 0%, var(--paper) 55%, #e8efea 100%);
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.dashboard-shell {
+    width: min(1120px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 48px 0 36px;
+}
+
+.dashboard-header,
+.site-header,
+.panel-heading,
+.site-footer,
+.status {
+    display: flex;
+    align-items: center;
+}
+
+.site-header,
+.panel-heading,
+.site-footer {
+    justify-content: space-between;
+}
+
+.dashboard-header {
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.eyebrow,
+.card-label,
+.range-label,
+.site-footer,
+.status {
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.eyebrow {
+    margin: 0 0 10px;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    margin-bottom: 0;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    line-height: 0.96;
+    font-weight: 400;
+}
+
+h2 {
+    margin-bottom: 0;
+    font-size: clamp(1.45rem, 2.5vw, 2.2rem);
+    font-weight: 400;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.current-reading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+    padding: 20px 24px;
+    border: 1px solid rgba(23, 35, 43, 0.1);
+    border-left: 5px solid var(--accent);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+}
+
+.notification-panel {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.8fr);
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 22px;
+    padding: 20px 24px;
+    border: 1px solid rgba(23, 35, 43, 0.1);
+    background: rgba(255, 253, 248, 0.72);
+}
+
+.notification-heading {
+    align-self: start;
+}
+
+.notification-panel h2 {
+    margin: 0 0 18px;
+    font-size: 1.5rem;
+}
+
+.alert-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--teal);
+    font: 700 0.75rem 'Trebuchet MS', Arial, sans-serif;
+    text-transform: uppercase;
+}
+
+.alert-switch input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--teal);
+}
+
+.notification-form label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font: 700 0.68rem 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.notification-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.notification-field-wide {
+    grid-column: 1 / -1;
+}
+
+.notification-field input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid rgba(23, 35, 43, 0.16);
+    border-radius: 8px;
+    color: var(--ink);
+    background: #fffdf8;
+    font: 1rem Georgia, 'Times New Roman', serif;
+}
+
+.notification-field input:focus {
+    border-color: var(--accent);
+    outline: 3px solid var(--accent-soft);
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    grid-column: 1 / -1;
+}
+
+.notification-status {
+    min-height: 1.1em;
+    margin: 0;
+    color: var(--teal);
+    font: 0.78rem 'Trebuchet MS', Arial, sans-serif;
+}
+
+.reading-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font: 700 0.68rem 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+#selected-sensor {
+    font-size: 1.25rem;
+    font-weight: 400;
+}
+
+.current-temperature {
+    color: var(--accent);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.control-button {
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid rgba(23, 35, 43, 0.16);
+    border-radius: 8px;
+    color: var(--ink);
+    background: rgba(255, 253, 248, 0.8);
+    font: 700 0.72rem 'Trebuchet MS', Arial, sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.control-button:hover,
+.control-button:focus-visible {
+    border-color: var(--accent);
+    outline: 3px solid var(--accent-soft);
+}
+
+.control-button-unit {
+    min-width: 58px;
+    color: #fffaf2;
+    background: var(--ink);
+}
+
+.status {
+    gap: 9px;
+    padding: 10px 14px;
+    border: 1px solid rgba(43, 114, 112, 0.24);
+    border-radius: 999px;
+    color: var(--teal);
+    background: rgba(255, 253, 248, 0.65);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 5px rgba(43, 114, 112, 0.12);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: 16px;
+    margin: 48px 0 22px;
+}
+
+.summary-card,
+.chart-panel {
+    border: 1px solid rgba(23, 35, 43, 0.1);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+}
+
+.summary-card {
+    min-height: 150px;
+    padding: 25px;
+}
+
+.summary-card-primary {
+    color: #fffaf2;
+    background: var(--ink);
+}
+
+.card-label {
+    display: block;
+    margin-bottom: 20px;
+    color: var(--muted);
+    font-size: 0.69rem;
+    font-weight: 700;
+}
+
+.summary-card-primary .card-label,
+.summary-card-primary .card-detail {
+    color: #b9c7c3;
+}
+
+.summary-card strong {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font-size: clamp(2.2rem, 5vw, 3.7rem);
+    line-height: 0.95;
+    font-weight: 400;
+}
+
+.summary-card-primary strong {
+    color: #f4b39c;
+}
+
+.card-detail {
+    color: var(--muted);
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 0.78rem;
+}
+
+.chart-panel {
+    padding: 26px 30px 20px;
+}
+
+.chart-panel[hidden] {
+    display: none;
+}
+
+.range-label {
+    color: var(--muted);
+    font-size: 0.68rem;
+}
+
+.chart-wrap {
+    width: 100%;
+    margin-top: 24px;
+    overflow: hidden;
+}
+
+.temperature-chart {
+    display: block;
+    width: 100%;
+    min-height: 300px;
+    color: var(--accent);
+}
+
+.chart-panel + .chart-panel {
+    margin-top: 22px;
+}
+
+@media (max-width: 680px) {
+    .notification-panel {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .notification-form {
+        grid-template-columns: 1fr;
+    }
+
+    .notification-field-wide {
+        grid-column: auto;
+    }
+
+    .notification-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+.grid-line {
+    stroke: var(--line);
+    stroke-width: 1;
+    stroke-dasharray: 4 7;
+}
+
+.axis-label {
+    fill: var(--muted);
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 13px;
+}
+
+.site-footer {
+    gap: 14px;
+    padding: 18px 2px 0;
+    color: var(--muted);
+    font-size: 0.64rem;
+}
+
+@media (max-width: 700px) {
+    .dashboard-shell {
+        width: min(100% - 28px, 560px);
+        padding-top: 32px;
+    }
+
+    .dashboard-header {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-bottom: 22px;
+    }
+
+    .controls {
+        width: 100%;
+    }
+
+    .current-reading {
+        padding: 18px;
+    }
+
+    .control-button:first-child {
+        flex: 1;
+    }
+
+    .site-header {
+        align-items: flex-start;
+        gap: 24px;
+        flex-direction: column;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        margin-top: 34px;
+    }
+
+    .summary-card {
+        min-height: auto;
+    }
+
+    .chart-panel {
+        padding: 22px 14px 14px;
+    }
+
+    .panel-heading {
+        align-items: flex-start;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .temperature-chart {
+        min-height: 250px;
+    }
+}
