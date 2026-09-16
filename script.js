@@ -77,6 +77,11 @@ function toDisplayTemperature(celsius) {
     return isFahrenheit ? celsius * 9 / 5 + 32 : celsius;
 }
 
+function updateThresholdLabels() {
+    document.querySelector('label[for="maximum-temperature"]').textContent = `Maximum temperature (${isFahrenheit ? 'F' : 'C'})`;
+    document.querySelector('label[for="minimum-temperature"]').textContent = `Minimum temperature (${isFahrenheit ? 'F' : 'C'})`;
+}
+
 function updateCurrentTemperature(readings) {
     if (readings !== (visibleSensor === 1 ? sensor1Readings : sensor2Readings)) {
         return;
@@ -113,8 +118,9 @@ function checkTemperatureAlert(readings, temperature) {
     const lowLimit = Number(minimumTemperature.value);
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
+    const deviceIsOn = onOffToggle.getAttribute('aria-pressed') === 'true';
 
-    if (!getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+    if (!deviceIsOn || !getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
 
@@ -241,6 +247,7 @@ unitToggle.addEventListener('click', () => {
     isFahrenheit = !isFahrenheit;
     unitToggle.setAttribute('aria-pressed', String(isFahrenheit));
     unitToggle.textContent = isFahrenheit ? '°F' : '°C';
+    updateThresholdLabels();
     document.querySelectorAll('[id^="temperature-axis-label-"]').forEach(axisLabel => {
         axisLabel.textContent = isFahrenheit ? 'Temperature (°F)' : 'Temperature (°C)';
     });
