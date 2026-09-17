@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+import time
 
 app = Flask(__name__)
 
@@ -7,6 +8,16 @@ sensor_data = {
     "sensor1": 0,
     "sensor2": 0
 }
+
+# When the ESP32 last actually POSTed data (0 = never yet). Used to detect
+# the "box is off / not posting" case, which is different from an individual
+# sensor reporting null while the box IS posting.
+last_post_time = 0
+
+# Consider data stale if we haven't heard from the ESP32 in this long.
+# Should be comfortably longer than the ESP32's own post interval (currently
+# ~1s) so normal network jitter doesn't cause false gaps.
+STALE_THRESHOLD_SECONDS = 3
 
 # Latest command waiting for ESP32
 pending_command = None
@@ -23,7 +34,7 @@ def home():
 # --------------------------------------------------
 @app.route('/api/esp32-data', methods=['POST'])
 def receive_esp32_data():
-    global sensor_data
+    global sensor_data, last_post_time
 
     data = request.get_json()
 
@@ -39,6 +50,7 @@ def receive_esp32_data():
     # }
 
     sensor_data.update(data)
+    last_post_time = time.time()
 
     return jsonify({"status": "ok"})
 
@@ -90,7 +102,14 @@ def send_command():
 # --------------------------------------------------
 @app.route('/api/sensor-readings', methods=['GET'])
 def get_sensor_readings():
-    return jsonify(sensor_data)
+    # If the ESP32 hasn't posted recently (box is off, unplugged, or lost
+    # connection), stop returning the last cached values - they're stale,
+    # not current. Report both sensors as null, which the front end already
+    # treats the same as an individual disconnected sensor.
+    if time.time() - last_post_time > STALE_THRESHOLD_SECONDS:
+        return jsonify({"sensor1": None, "sensor2": None, "stale": True})
+
+    return jsonify({**sensor_data, "stale": False})
 
 
 if __name__ == '__main__':
