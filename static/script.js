@@ -15,8 +15,9 @@ const sensorPanels = [
     document.querySelector('#sensor-panel-2')
 ];
 const onOffToggle = document.querySelector('#on-off-toggle');
-const staticFormsEndpoint = 'https://api.staticforms.dev/submit';
-const staticFormsAccessKey = 'sf_c72e79fcb796522af7247a55';
+const emailJsPublicKey = 'IA9jwjIDwLvYZmb_4';
+const emailJsServiceId = 'service_fjgljvm';
+const emailJsTemplateId = 'template_t84jn0b';
 
 const chartLeft = 70;
 const chartTop = 20;
@@ -34,6 +35,8 @@ const databaseSignalEndpoint = '/api/device-command';
 
 let isFahrenheit = false;
 let visibleSensor = 1;
+
+emailjs.init({ publicKey: emailJsPublicKey });
 
 function getNotificationsEnabled() {
     return localStorage.getItem(notificationsStateStorageKey) === 'true';
@@ -83,6 +86,11 @@ function chartY(temperature) {
 
 function toDisplayTemperature(celsius) {
     return isFahrenheit ? celsius * 9 / 5 + 32 : celsius;
+}
+
+function updateThresholdLabels() {
+    document.querySelector('label[for="maximum-temperature"]').textContent = `Maximum temperature (${isFahrenheit ? 'F' : 'C'})`;
+    document.querySelector('label[for="minimum-temperature"]').textContent = `Minimum temperature (${isFahrenheit ? 'F' : 'C'})`;
 }
 
 function updateCurrentTemperature(readings) {
@@ -150,8 +158,9 @@ function checkTemperatureAlert(readings, temperature) {
     const lowLimit = Number(minimumTemperature.value);
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
+    const deviceIsOn = onOffToggle.getAttribute('aria-pressed') === 'true';
 
-    if (!getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+    if (!deviceIsOn || !getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
 
@@ -194,20 +203,11 @@ async function sendTemperatureAlert(message, sensorNumber, temperature) {
 
     const subject = `Temperature alert: Sensor ${sensorNumber}`;
     const body = `${message}\nSensor ${sensorNumber} is reading ${temperature}.`;
-    const formData = new FormData();
-    formData.append('accessKey', staticFormsAccessKey);
-    formData.append('subject', subject);
-    formData.append('replyTo', contact);
-    formData.append('message', `Alert recipient: ${contact}\n${body}`);
-
-    const response = await fetch(staticFormsEndpoint, {
-        method: 'POST',
-        body: formData
+    await emailjs.send(emailJsServiceId, emailJsTemplateId, {
+        to_email: contact,
+        subject,
+        message: body
     });
-
-    if (!response.ok) {
-        throw new Error(`Static Forms request failed with status ${response.status}`);
-    }
 
     notificationStatus.textContent = 'Email alert sent.';
 }
@@ -298,6 +298,7 @@ unitToggle.addEventListener('click', () => {
     isFahrenheit = !isFahrenheit;
     unitToggle.setAttribute('aria-pressed', String(isFahrenheit));
     unitToggle.textContent = isFahrenheit ? '°F' : '°C';
+    updateThresholdLabels();
     document.querySelectorAll('[id^="temperature-axis-label-"]').forEach(axisLabel => {
         axisLabel.textContent = isFahrenheit ? 'Temperature (°F)' : 'Temperature (°C)';
     });
