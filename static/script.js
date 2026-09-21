@@ -158,9 +158,13 @@ function checkTemperatureAlert(readings, temperature) {
     const lowLimit = Number(minimumTemperature.value);
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
-    const deviceIsOn = onOffToggle.getAttribute('aria-pressed') === 'true';
 
-    if (!deviceIsOn || !getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
+    // Note: onOffToggle is the dashboard's "virtual button" for a sensor's
+    // display state (spec 5b), not the third box's hardware switch - it must
+    // NOT gate alerting. Whether the third box/sensor is actually reporting
+    // is already covered above by the `temperature == null` check, which is
+    // the real signal for "no data available" (spec 5a-ii, 7).
+    if (!getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
 
