@@ -87,7 +87,8 @@
                     <text class="axis-label" x="470" y="398" text-anchor="middle">seconds ago from the current time</text>
                     <text id="temperature-axis-label-1" class="axis-label" x="960" y="180" text-anchor="middle" transform="rotate(90 960 180)">Temperature (°C)</text>
                     <path id="temperature-line-1" d="" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <circle id="latest-point-1" r="6" fill="currentColor"></circle>
+                    <path id="temperature-line-out-of-range-1" class="temperature-line-out-of-range" d=""></path>
+                    <circle id="latest-point-1" class="latest-point" r="6" fill="currentColor"></circle>
                 </svg>
             </div>
         </section>
@@ -104,12 +105,13 @@
                     <text class="axis-label" x="470" y="398" text-anchor="middle">seconds ago from the current time</text>
                     <text id="temperature-axis-label-2" class="axis-label" x="960" y="180" text-anchor="middle" transform="rotate(90 960 180)">Temperature (°C)</text>
                     <path id="temperature-line-2" d="" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <circle id="latest-point-2" r="6" fill="currentColor"></circle>
+                    <path id="temperature-line-out-of-range-2" class="temperature-line-out-of-range" d=""></path>
+                    <circle id="latest-point-2" class="latest-point" r="6" fill="currentColor"></circle>
                 </svg>
             </div>
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script src="static/script.js?v=6"></script>
+    <script src="static/script.js?v=7"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@
     --accent: #d85b3f;
     --accent-soft: #f4d9ce;
     --teal: #2b7270;
+    --out-of-range: #a1201c;
     --shadow: 0 18px 45px rgba(34, 44, 47, 0.1);
 }
 
@@ -336,6 +337,23 @@ h2 {
     width: 100%;
     min-height: 300px;
     color: var(--accent);
+}
+
+/* Off-scale stretch of the line (reading is below/above the chart's fixed
+   10-50C / 50-122F axis, per spec 5c-i - the axis never moves, so a real
+   reading past it gets clamped to the edge and drawn like this instead of
+   silently continuing off-canvas or being hidden like missing data). */
+.temperature-line-out-of-range {
+    fill: none;
+    stroke: var(--out-of-range);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 10 8;
+}
+
+.latest-point.is-out-of-range {
+    fill: var(--out-of-range);
 }
 
 .chart-panel + .chart-panel {

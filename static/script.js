@@ -258,38 +258,62 @@ function renderChart(readings) {
         return;
     }
 
-    // Build an SVG path instead of a single polyline so a missing (null)
-    // reading breaks the line into a new subpath ('M') rather than being
-    // skipped over and silently connected to the next valid point.
+    const { minimum: rangeMin, maximum: rangeMax } = getTemperatureRange();
+
+    // Two SVG paths instead of one. The normal path breaks into a new
+    // subpath ('M') at a missing (null) reading, exactly as before, so a
+    // gap reads as "no data". A separate dashed/colored path carries any
+    // reading outside the chart's fixed axis range (spec 5c-i: the axis is
+    // always 10-50C / 50-122F, it never rescales to fit the data) - that
+    // point is clamped to the axis edge so the line can't run off-canvas,
+    // and it's drawn on this other path so "off-scale" is never visually
+    // confused with "no data" (spec 5c-iv requires the two be distinct).
     let pathData = '';
+    let outOfRangePathData = '';
     let segmentOpen = false;
+    let outOfRangeSegmentOpen = false;
 
     for (const reading of visibleReadings) {
         if (reading.temperature == null) {
             segmentOpen = false; // gap: next valid point starts a new segment
+            outOfRangeSegmentOpen = false;
             continue;
         }
 
         const secondsAgo = (newestTime - reading.time) / 1000;
-        const temperature = toDisplayTemperature(reading.temperature);
+        const displayTemperature = toDisplayTemperature(reading.temperature);
+        const isOutOfRange = displayTemperature < rangeMin || displayTemperature > rangeMax;
+        const clampedTemperature = clamp(displayTemperature, rangeMin, rangeMax);
         const x = chartX(secondsAgo).toFixed(1);
-        const y = chartY(temperature).toFixed(1);
+        const y = chartY(clampedTemperature).toFixed(1);
 
-        pathData += `${segmentOpen ? 'L' : 'M'}${x},${y} `;
-        segmentOpen = true;
+        if (isOutOfRange) {
+            outOfRangePathData += `${outOfRangeSegmentOpen ? 'L' : 'M'}${x},${y} `;
+            outOfRangeSegmentOpen = true;
+            segmentOpen = false; // don't bridge the normal line across it
+        } else {
+            pathData += `${segmentOpen ? 'L' : 'M'}${x},${y} `;
+            segmentOpen = true;
+            outOfRangeSegmentOpen = false;
+        }
     }
 
     const chartNumber = readings === sensor1Readings ? 1 : 2;
     const temperatureLine = document.querySelector(`#temperature-line-${chartNumber}`);
+    const outOfRangeLine = document.querySelector(`#temperature-line-out-of-range-${chartNumber}`);
     const latestPoint = document.querySelector(`#latest-point-${chartNumber}`);
 
     temperatureLine.setAttribute('d', pathData.trim());
+    outOfRangeLine.setAttribute('d', outOfRangePathData.trim());
 
     const latestReading = visibleReadings.at(-1);
     if (latestReading && latestReading.temperature != null) {
+        const displayTemperature = toDisplayTemperature(latestReading.temperature);
+        const isOutOfRange = displayTemperature < rangeMin || displayTemperature > rangeMax;
         latestPoint.setAttribute('cx', chartX(0));
-        latestPoint.setAttribute('cy', chartY(toDisplayTemperature(latestReading.temperature)));
+        latestPoint.setAttribute('cy', chartY(clamp(displayTemperature, rangeMin, rangeMax)));
         latestPoint.setAttribute('visibility', 'visible');
+        latestPoint.classList.toggle('is-out-of-range', isOutOfRange);
     } else {
         // Hide the "current value" dot while the latest sample is missing,
         // instead of parking it at the bottom of the chart (which used to
