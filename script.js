@@ -180,19 +180,22 @@ function renderChart(readings) {
 
     const newestTime = readings.at(-1).time;
     const visibleReadings = readings.filter(reading => (newestTime - reading.time) / 1000 <= maximumSeconds);
+    const validReadings = visibleReadings.filter(reading => reading.temperature != null && isTemperatureInRange(reading.temperature));
 
-    if (!visibleReadings.length) {
+    if (!validReadings.length) {
+        const chartNumber = readings === sensor1Readings ? 1 : 2;
+        const temperatureLine = document.querySelector(`#temperature-line-${chartNumber}`);
+        const latestPoint = document.querySelector(`#latest-point-${chartNumber}`);
+        temperatureLine.setAttribute('points', '');
+        latestPoint.setAttribute('visibility', 'hidden');
+        updateCurrentTemperature(readings);
         return;
     }
 
     const points = [];
     let latestValidReading = null;
 
-    for (const reading of visibleReadings) {
-        if (reading.temperature == null) {
-            continue;
-        }
-
+    for (const reading of validReadings) {
         const secondsAgo = (newestTime - reading.time) / 1000;
         const temperature = toDisplayTemperature(reading.temperature);
         points.push(`${chartX(secondsAgo).toFixed(1)},${chartY(temperature).toFixed(1)}`);
@@ -208,9 +211,9 @@ function renderChart(readings) {
     if (latestValidReading) {
         latestPoint.setAttribute('cx', chartX(0));
         latestPoint.setAttribute('cy', chartY(toDisplayTemperature(latestValidReading.temperature)));
+        latestPoint.setAttribute('visibility', 'visible');
     } else {
-        latestPoint.setAttribute('cx', chartX(0));
-        latestPoint.setAttribute('cy', chartY(getTemperatureRange().minimum));
+        latestPoint.setAttribute('visibility', 'hidden');
     }
 
     updateCurrentTemperature(readings);

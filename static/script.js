@@ -85,6 +85,10 @@ function toDisplayTemperature(celsius) {
     return isFahrenheit ? celsius * 9 / 5 + 32 : celsius;
 }
 
+function isTemperatureInRange(celsius) {
+    return Number.isFinite(celsius) && celsius >= minimumValue && celsius <= maximumValue;
+}
+
 function updateCurrentTemperature(readings) {
     if (readings !== (visibleSensor === 1 ? sensor1Readings : sensor2Readings)) {
         return;
@@ -95,6 +99,8 @@ function updateCurrentTemperature(readings) {
         currentTemperature.textContent = `-- °${isFahrenheit ? 'F' : 'C'}`;
     } else if (latestReading.temperature == null) {
         currentTemperature.textContent = 'Sensor unplugged';
+    } else if (!isTemperatureInRange(latestReading.temperature)) {
+        currentTemperature.textContent = 'Out of range';
     } else {
         currentTemperature.textContent = `${toDisplayTemperature(latestReading.temperature).toFixed(1)}°${isFahrenheit ? 'F' : 'C'}`;
     }
@@ -219,8 +225,15 @@ function renderChart(readings) {
 
     const newestTime = readings.at(-1).time;
     const visibleReadings = readings.filter(reading => (newestTime - reading.time) / 1000 <= maximumSeconds);
+    const validReadings = visibleReadings.filter(reading => reading.temperature != null && isTemperatureInRange(reading.temperature));
 
-    if (!visibleReadings.length) {
+    if (!validReadings.length) {
+        const chartNumber = readings === sensor1Readings ? 1 : 2;
+        const temperatureLine = document.querySelector(`#temperature-line-${chartNumber}`);
+        const latestPoint = document.querySelector(`#latest-point-${chartNumber}`);
+        temperatureLine.setAttribute('d', '');
+        latestPoint.setAttribute('visibility', 'hidden');
+        updateCurrentTemperature(readings);
         return;
     }
 
@@ -230,12 +243,7 @@ function renderChart(readings) {
     let pathData = '';
     let segmentOpen = false;
 
-    for (const reading of visibleReadings) {
-        if (reading.temperature == null) {
-            segmentOpen = false; // gap: next valid point starts a new segment
-            continue;
-        }
-
+    for (const reading of validReadings) {
         const secondsAgo = (newestTime - reading.time) / 1000;
         const temperature = toDisplayTemperature(reading.temperature);
         const x = chartX(secondsAgo).toFixed(1);
@@ -251,15 +259,12 @@ function renderChart(readings) {
 
     temperatureLine.setAttribute('d', pathData.trim());
 
-    const latestReading = visibleReadings.at(-1);
-    if (latestReading && latestReading.temperature != null) {
+    const latestReading = validReadings.at(-1);
+    if (latestReading) {
         latestPoint.setAttribute('cx', chartX(0));
         latestPoint.setAttribute('cy', chartY(toDisplayTemperature(latestReading.temperature)));
         latestPoint.setAttribute('visibility', 'visible');
     } else {
-        // Hide the "current value" dot while the latest sample is missing,
-        // instead of parking it at the bottom of the chart (which used to
-        // look like a real 10°C/50°F reading).
         latestPoint.setAttribute('visibility', 'hidden');
     }
 
