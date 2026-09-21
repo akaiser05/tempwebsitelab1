@@ -14,7 +14,11 @@ const sensorPanels = [
     document.querySelector('#sensor-panel-1'),
     document.querySelector('#sensor-panel-2')
 ];
-const onOffToggle = document.querySelector('#on-off-toggle');
+// One physical-button-style toggle per sensor (spec 5b: "virtually press
+// the button in the third box"), replacing the old single on-off-toggle
+// that actually just controlled the box's LCD backlight, not a sensor.
+const sensor1PowerToggle = document.querySelector('#sensor1-power-toggle');
+const sensor2PowerToggle = document.querySelector('#sensor2-power-toggle');
 const emailJsPublicKey = 'IA9jwjIDwLvYZmb_4';
 const emailJsServiceId = 'service_fjgljvm';
 const emailJsTemplateId = 'template_t84jn0b';
@@ -42,23 +46,34 @@ function getNotificationsEnabled() {
     return localStorage.getItem(notificationsStateStorageKey) === 'true';
 }
 
-function updateDeviceStateUI(isOn) {
-    const value = String(isOn);
-    onOffToggle.setAttribute('aria-pressed', value);
-    onOffToggle.textContent = isOn ? 'On' : 'Off';
+// Reflects a sensor's real hardware enabled state (as last reported by the
+// box) on its toggle button. `enabled === null` means we don't know yet
+// (nothing heard from the box, or the box is currently stale/off) - in
+// that case leave the button showing whatever it last showed rather than
+// guessing, since flipping it to "Off" could misrepresent the box's actual
+// state once it comes back.
+function updateSensorPowerButtonUI(button, sensorNumber, enabled) {
+    if (enabled == null) {
+        return;
+    }
+    button.setAttribute('aria-pressed', String(enabled));
+    button.textContent = `Sensor ${sensorNumber}: ${enabled ? 'On' : 'Off'}`;
 }
 
-function setDeviceState(isOn) {
-    updateDeviceStateUI(isOn);
-
+// Virtually "presses" a sensor's physical button by telling the box what
+// state to be in. Sends an explicit true/false (not a toggle) based on the
+// button's last known real state, so it stays correct even if someone also
+// pressed the physical button around the same time.
+function sendSensorCommand(sensorNumber, value) {
     fetch(databaseSignalEndpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            command: 'set_display',
-            value: isOn
+            command: 'set_sensor',
+            sensor: sensorNumber,
+            value
         })
     })
     .then(response => response.json())
@@ -101,8 +116,12 @@ function updateCurrentTemperature(readings) {
     const latestReading = readings.at(-1);
     if (!latestReading) {
         currentTemperature.textContent = `-- °${isFahrenheit ? 'F' : 'C'}`;
+    } else if (latestReading.unplugged) {
+        // Button is on, but the probe itself isn't connected/working.
+        currentTemperature.textContent = 'Temperature Sensor Unplugged';
     } else if (latestReading.temperature == null) {
-        currentTemperature.textContent = 'Sensor unplugged';
+        // Button is off, or the third box itself isn't reporting.
+        currentTemperature.textContent = 'No Data Available';
     } else {
         currentTemperature.textContent = `${toDisplayTemperature(latestReading.temperature).toFixed(1)}°${isFahrenheit ? 'F' : 'C'}`;
     }
@@ -128,15 +147,24 @@ function addReading(readings, randomTemperature) {
     checkTemperatureAlert(readings, temperature);
 }
 
-function addActualReading(readings, temperature) {
-    // `null` is a deliberate "sensor disconnected" signal from the ESP32 and
-    // must still be recorded so the chart can show a gap and keep scrolling.
-    // Only reject genuinely bad (non-null, non-finite) values.
+// `unplugged` distinguishes *why* temperature is null (see
+// updateCurrentTemperature). `options.time` lets this same function replay
+// server-recorded history at its original timestamps (see
+// loadSensorHistory); `options.notify` is set to false during that replay
+// so hydrating 300 past samples on page load doesn't re-fire 300 alert
+// emails for readings that already happened.
+function addActualReading(readings, temperature, unplugged, options = {}) {
+    const { time = Date.now(), notify = true } = options;
+
+    // `null` is a deliberate "no reading" signal and must still be recorded
+    // so the chart can show a gap and keep scrolling. Only reject genuinely
+    // bad (non-null, non-finite) values.
     if (temperature !== null && !Number.isFinite(temperature)) return;
 
     readings.push({
-        time: Date.now(),
-        temperature: temperature
+        time,
+        temperature,
+        unplugged: Boolean(unplugged)
     });
 
     while (readings.length > maximumReadings) {
@@ -144,7 +172,10 @@ function addActualReading(readings, temperature) {
     }
 
     renderChart(readings);
-    checkTemperatureAlert(readings, temperature);
+
+    if (notify) {
+        checkTemperatureAlert(readings, temperature);
+    }
 }
 
 function checkTemperatureAlert(readings, temperature) {
@@ -159,11 +190,10 @@ function checkTemperatureAlert(readings, temperature) {
     const contact = notificationContact.value.trim();
     const alertState = alertStates.get(readings);
 
-    // Note: onOffToggle is the dashboard's "virtual button" for a sensor's
-    // display state (spec 5b), not the third box's hardware switch - it must
-    // NOT gate alerting. Whether the third box/sensor is actually reporting
-    // is already covered above by the `temperature == null` check, which is
-    // the real signal for "no data available" (spec 5a-ii, 7).
+    // Note: whether a sensor's button is on/off (physically or via its
+    // website toggle, spec 5b) must NOT separately gate alerting - it's
+    // already covered above by the `temperature == null` check, which is
+    // the one real signal for "no reading available" (spec 5a-ii, 7).
     if (!getNotificationsEnabled() || !contact || !Number.isFinite(highLimit) || !Number.isFinite(lowLimit)) {
         return;
     }
@@ -323,9 +353,14 @@ sensorToggle.addEventListener('click', () => {
     updateCurrentTemperature(visibleSensor === 1 ? sensor1Readings : sensor2Readings);
 });
 
-onOffToggle.addEventListener('click', () => {
-    const isCurrentlyOn = onOffToggle.getAttribute('aria-pressed') === 'true';
-    setDeviceState(!isCurrentlyOn);
+sensor1PowerToggle.addEventListener('click', () => {
+    const isCurrentlyOn = sensor1PowerToggle.getAttribute('aria-pressed') === 'true';
+    sendSensorCommand(1, !isCurrentlyOn);
+});
+
+sensor2PowerToggle.addEventListener('click', () => {
+    const isCurrentlyOn = sensor2PowerToggle.getAttribute('aria-pressed') === 'true';
+    sendSensorCommand(2, !isCurrentlyOn);
 });
 
 notificationsEnabled.addEventListener('change', () => {
@@ -348,31 +383,6 @@ notificationForm.addEventListener('submit', event => {
     notificationStatus.textContent = 'Alert settings saved.';
 });
 
-// async function readSensorsFromDatabase() {
-//     try {
-//         const response = await fetch('/api/sensor-readings');
-
-//         if (!response.ok) {
-//             throw new Error(`HTTP ${response.status}`);
-//         }
-
-//         const data = await response.json();
-
-//         if (data.sensor1 == null) {
-//             throw new Error('Sensor 1 Disconnected.');
-//         }
-//         if (data.sensor2 == 'null') {
-//             throw new Error('Sensor 2 Disconnected.');
-//         }
-//         else {
-//         addActualReading(sensor1Readings, Number(data.sensor1));
-//         addActualReading(sensor2Readings, Number(data.sensor2));
-//         }
-
-//     } catch (error) {
-//         console.error('Failed to read sensor data:', error);
-//     }
-// }
 async function readSensorsFromDatabase() {
     try {
         const response = await fetch('/api/sensor-readings');
@@ -385,38 +395,79 @@ async function readSensorsFromDatabase() {
 
         // Check sensor 1
         if (data.sensor1 == null) {
-            console.error("Sensor 1 Disconnected");
-            addActualReading(sensor1Readings, null);
+            addActualReading(sensor1Readings, null, data.sensor1_unplugged);
         } else {
-            addActualReading(sensor1Readings, Number(data.sensor1));
+            addActualReading(sensor1Readings, Number(data.sensor1), false);
         }
 
         // Check sensor 2
         if (data.sensor2 == null) {
-            console.error("Sensor 2 Disconnected");
-            addActualReading(sensor2Readings, null);
+            addActualReading(sensor2Readings, null, data.sensor2_unplugged);
         } else {
-            addActualReading(sensor2Readings, Number(data.sensor2));
+            addActualReading(sensor2Readings, Number(data.sensor2), false);
         }
+
+        // Keep each sensor's website toggle in sync with the box's real
+        // state. While the box is stale (not reporting), leave the buttons
+        // showing their last known state rather than guessing.
+        updateSensorPowerButtonUI(sensor1PowerToggle, 1, data.stale ? null : data.sensor1_enabled);
+        updateSensorPowerButtonUI(sensor2PowerToggle, 2, data.stale ? null : data.sensor2_enabled);
 
     } catch (error) {
         console.error('Failed to read sensor data:', error);
     }
 }
 
+// Reloads the last up-to-300 seconds of readings the server has recorded,
+// so refreshing the page redraws the graph immediately instead of starting
+// empty and waiting 5 minutes to refill it.
+async function loadSensorHistory() {
+    try {
+        const response = await fetch('/api/sensor-history');
 
-updateDeviceStateUI(false);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const history = await response.json();
+
+        for (const entry of history) {
+            const options = { time: entry.time, notify: false };
+            addActualReading(
+                sensor1Readings,
+                entry.sensor1 == null ? null : Number(entry.sensor1),
+                entry.sensor1_unplugged,
+                options
+            );
+            addActualReading(
+                sensor2Readings,
+                entry.sensor2 == null ? null : Number(entry.sensor2),
+                entry.sensor2_unplugged,
+                options
+            );
+        }
+    } catch (error) {
+        console.error('Failed to load sensor history:', error);
+    }
+}
+
+
 notificationsEnabled.checked = getNotificationsEnabled();
 
 drawAxes(1);
 drawAxes(2);
-renderChart(sensor1Readings);
-renderChart(sensor2Readings);
 alertStates.set(sensor1Readings, { high: false, low: false });
 alertStates.set(sensor2Readings, { high: false, low: false });
 
-// Get new sensor data from Flask every second
-setInterval(readSensorsFromDatabase, 1000);
+// Rebuild the last 300 seconds of graph from the server's history first
+// (so a refresh doesn't start from a blank chart), then start live polling.
+loadSensorHistory().then(() => {
+    renderChart(sensor1Readings);
+    renderChart(sensor2Readings);
 
-// Get the first reading immediately
-readSensorsFromDatabase();
+    // Get new sensor data from Flask every second
+    setInterval(readSensorsFromDatabase, 1000);
+
+    // Get the first live reading immediately
+    readSensorsFromDatabase();
+});

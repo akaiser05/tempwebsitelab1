@@ -395,14 +395,15 @@ h2 {
 
     .controls {
         width: 100%;
+        flex-wrap: wrap;
     }
 
     .current-reading {
         padding: 18px;
     }
 
-    .control-button:first-child {
-        flex: 1;
+    .control-button {
+        flex: 1 1 auto;
     }
 
     .site-header {
